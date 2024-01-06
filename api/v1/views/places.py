@@ -148,11 +148,13 @@ def places_search():
                 for place in city.places:
                     places.append(place)
 
-    amenities = request_dict.get('amenities')
-    if amenities:
+    amenity_ids = request_dict.get('amenities')
+    if amenity_ids:
         for place in places:
             place_amenity_ids = [amn.id for amn in place.amenities]
-            if not set(amenities).issubset(set(place_amenity_ids)):
-                places.remove(place)
+            for amenity_id in amenity_ids:
+                if not amenity_id in place_amenity_ids:
+                    places.remove(place)
+                    break
 
     return jsonify([place.to_dict() for place in places])
