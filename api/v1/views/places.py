@@ -126,24 +126,27 @@ def places_search():
     cities = request_dict.get('cities')
     if cities is None:
         cities = []
+    ameneties = request_dict.get('ameneties')
 
-    if not states and not cities:
+    if not states and not cities and not ameneties:
         places = storage.all(Place).values()
     else:
         places = []
         if states:
             for state_id in states:
                 state = storage.get(State, state_id)
-                if state:
-                    for city in state.cities:
-                        if city.id not in cities:
-                            cities.append(city.id)
+                if not state:
+                    abort(404)
+                for city in state.cities:
+                    if city.id not in cities:
+                        cities.append(city.id)
         if cities:
             for city_id in cities:
                 city = storage.get(City, city_id)
-                if city:
-                    for place in city.places:
-                        places.append(place)
+                if not city:
+                    abort(404)
+                for place in city.places:
+                    places.append(place)
 
     ameneties = request_dict.get('ameneties')
     if ameneties:
