@@ -3,8 +3,10 @@
 from api.v1.views import app_views
 from flask import abort, jsonify, request
 from models import storage
-from models.place import Place
+from models.amenity import Amenity
 from models.city import City
+from models.state import State
+from models.place import Place
 from models.user import User
 
 
@@ -102,3 +104,52 @@ def update_place(place_id):
     place.save()
 
     return jsonify(place.to_dict()), 200
+
+
+@app_views.route('/places_search', methods=['POST'],
+                 strict_slashes=False)
+def places_search():
+    """retrieve places depending on JSON request"""
+
+    try:
+        request_dict = request.get_json()
+    except Exception:
+        return 'Not a JSON', 400
+
+    if request_dict is None:
+        return 'Not a JSON', 400
+
+    if len(request_dict) == 0:
+        return jsonify([obj.to_dict() for obj in storage.all(Place).values()])
+
+    states = request_dict.get('states')
+    cities = request_dict.get('cities')
+    if cities is None:
+        cities = []
+
+    if not states and not cities:
+        places = storage.all(Place).values()
+    else:
+        places = []
+        if states:
+            for state_id in states:
+                state = storage.get(State, state_id)
+                if state:
+                    for city in state.cities:
+                        if city.id not in cities:
+                            cities.append(city.id)
+        if cities:
+            for city_id in cities:
+                city = storage.get(City, city_id)
+                if city:
+                    for place in city.places:
+                        places.append(place)
+
+    ameneties = request_dict.get('ameneties')
+    if ameneties:
+        for place in places:
+            place_amenity_ids = [amn.id for amn in place.ameneties]
+            if not set(amenities).issubset(set(place_amenity_ids)):
+                places.remove(place)
+
+    return jsonify([place.to_dict() for place in places])
