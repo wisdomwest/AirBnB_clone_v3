@@ -106,7 +106,7 @@ def update_place(place_id):
 
 @app_views.route('/places_search', methods=['POST'],
                  strict_slashes=False)
-def places_search)):
+def places_search():
     """retrieve places depending on JSON request"""
 
     try:
@@ -114,6 +114,8 @@ def places_search)):
     except Exception:
         return 'Not a JSON', 400
 
-    if not request_dict:
+    if request_dict is None:
         return 'Not a JSON', 400
 
+    if len(request_dict) == 0:
+        return jsonify([obj.to_dict() for obj in storage.all(Place).values()])
