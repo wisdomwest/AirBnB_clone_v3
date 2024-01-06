@@ -119,3 +119,21 @@ def places_search():
 
     if len(request_dict) == 0:
         return jsonify([obj.to_dict() for obj in storage.all(Place).values()])
+
+    states = request_dict.get('states')
+    cities = request_dict.get('cities')
+
+    if not states and not cities:
+        places = storage.all(Place).values()
+    else:
+        places = []
+        for state_id in states:
+            state = storage.get(State, state_id)
+            state_cities = state.cities
+            for city in state_cities:
+                if city.id not in cities:
+                    cities.append(city.id)
+        for city_id in cities:
+                city = storage.get(City, city_id)
+                for place in city.places:
+                    places.append(place)
