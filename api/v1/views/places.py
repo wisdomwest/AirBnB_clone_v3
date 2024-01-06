@@ -126,9 +126,9 @@ def places_search():
     cities = request_dict.get('cities')
     if cities is None:
         cities = []
-    ameneties = request_dict.get('ameneties')
+    amenities = request_dict.get('amenities')
 
-    if not states and not cities and not ameneties:
+    if not states and not cities and not amenities:
         places = storage.all(Place).values()
     else:
         places = []
@@ -148,10 +148,10 @@ def places_search():
                 for place in city.places:
                     places.append(place)
 
-    ameneties = request_dict.get('ameneties')
-    if ameneties:
+    amenities = request_dict.get('amenities')
+    if amenities:
         for place in places:
-            place_amenity_ids = [amn.id for amn in place.ameneties]
+            place_amenity_ids = [amn.id for amn in place.amenities]
             if not set(amenities).issubset(set(place_amenity_ids)):
                 places.remove(place)
 
