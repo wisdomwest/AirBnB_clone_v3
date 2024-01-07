@@ -148,13 +148,19 @@ def places_search():
                 for place in city.places:
                     places.append(place)
 
+    def check_inclusion(child, parent):
+        """check if a parent list contains all the child list items"""
+        for items in child:
+            if item not in parent:
+                return False
+
+        return True
+
     amenity_ids = request_dict.get('amenities')
     if amenity_ids:
         for place in places:
             place_amenity_ids = [amn.id for amn in place.amenities]
-            for amenity_id in amenity_ids:
-                if not amenity_id in place_amenity_ids:
-                    places.remove(place)
-                    break
+            if not check_inclusion(amenity_ids, place_amenity_ids):
+                places.remove(place)
 
     return jsonify([place.to_dict() for place in places])
