@@ -136,8 +136,8 @@ def places_search():
                 if not state:
                     abort(404)
                 for city in state.cities:
-                    if city.id not in cities:
-                        cities.append(city.id)
+                    for place in city.places:
+                        places.append(place)
 
         if cities:
             for city_id in cities:
@@ -145,11 +145,12 @@ def places_search():
                 if not city:
                     abort(404)
                 for place in city.places:
-                    places.append(place)
+                    if place not in places:
+                        places.append(place)
 
     amenity_ids = request_dict.get('amenities')
-    if amenity_ids:
 
+    if amenity_ids:
         # Helper function to filter places who lack of desired amenities
         def check_inclusion(child, parent):
             """check if a parent list contains all the child list items"""
