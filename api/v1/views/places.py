@@ -116,7 +116,7 @@ def places_search():
     except Exception:
         return 'Not a JSON', 400
 
-    if request_dict is None:
+    if type(request_dict) is not dict:
         return 'Not a JSON', 400
 
     states = request_dict.get('states')
@@ -166,4 +166,5 @@ def places_search():
             if not check_inclusion(amenity_ids, place_amenity_ids):
                 places.remove(place)
 
-    return jsonify([place.to_dict() for place in places])
+    places_dicts = [place.to_dict() for place in places]
+    return jsonify(places_dicts)
