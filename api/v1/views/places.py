@@ -126,7 +126,7 @@ def places_search():
     amenities = request_dict.get('amenities')
 
     if not states and not cities:
-        places = storage.all(Place).values()
+        places = list(storage.all(Place).values())
     else:
         places = []
 
@@ -151,20 +151,22 @@ def places_search():
     amenity_ids = request_dict.get('amenities')
 
     if amenity_ids:
-        # Helper function to filter places who lack of desired amenities
-        def check_inclusion(child, parent):
-            """check if a parent list contains all the child list items"""
-            for item in child:
-                if item not in parent:
-                    return False
-
-            return True
 
         # Filter places based on amenity_ids
-        for place in places:
-            place_amenity_ids = [amn.id for amn in place.amenities]
-            if not check_inclusion(amenity_ids, place_amenity_ids):
+        for place in list(places):
+            if not place.amenities:
                 places.remove(place)
+            else:
+                place_amenities_ids = [am.id for am in place.amenities]
+                for am_id in amenity_ids:
+                    if am_id not in place_amenities_ids:
+                        places.remove(place)
 
     places_dicts = [place.to_dict() for place in places]
+
+    for pd in places_dicts:
+        if 'amenities' in pd.keys():
+            place_amenities = [amn.to_dict() for amn in pd['amenities']]
+            pd['amenities'] = place_amenities
+
     return jsonify(places_dicts)
